@@ -53,6 +53,16 @@ getAvgCalDeficit <- function(avgPoundPerWeek) round(avgPoundPerWeek * 500 )
 
 getAvgCalToConsume <- function(burned, deficit) burned - deficit 
 
+getStatusText <- function(calperday) {
+     if (calperday < 0) {
+          status <- "<br/><br/><b><big>ERROR: You cannot consume NEGATIVE calories!</big></b><br/><br/><br/>"
+     } else if ( calperday > 0 && calperday < 500 ) {
+          status <- "<b>WARNING: Consuming less than 500 calories per day for long periods is DANGEROUS!</b><br/><br/>"
+     } else {
+          status <- ""
+     }
+}
+
 getPlots <- function(curWeight, tarWeight, height, age, activity, numweeks, gender) {
           
      # Create data frames for Plots
@@ -142,7 +152,11 @@ shinyServer(
           )
      })
      
-
+     output$statusText <- renderText({ 
+          getStatusText(round(mean(newData()$CaloriesToConsumePerDay)))
+     })
+     
+     
      # Output plots
      
      output$calPlot <- renderPlot({ 
@@ -168,18 +182,18 @@ shinyServer(
           
           abline(h=bmiHealthy, lwd=6, col="green3")
           abline(h=bmiOverweight-.15, lwd=6, col="green3")
-          text(10, (bmiHealthy+bmiOverweight)/2, "Healthy", cex=2, col="green3")
+          text(min(10,numweeks/2), (bmiHealthy+bmiOverweight)/2, "Healthy", cex=1, col="green3")
           
           abline(h=bmiOverweight, lwd=6, col="yellow3")
           abline(h=bmiObese-.15, lwd=6, col="yellow3")
-          text(10, (bmiOverweight+bmiObese)/2, "Overweight", cex=2, col="yellow3")
+          text(min(10,numweeks/2), (bmiOverweight+bmiObese)/2, "Overweight", cex=1, col="yellow3")
           
           abline(h=bmiObese, lwd=6, col="orange3")
           abline(h=bmiExtremelyObese-.15, lwd=6, col="orange3")
-          text(10, (bmiObese+bmiExtremelyObese)/2, "Obese", cex=2, col="orange3")
+          text(min(10,numweeks/2), (bmiObese+bmiExtremelyObese)/2, "Obese", cex=1, col="orange3")
           
           abline(h=bmiExtremelyObese, lwd=6, col="red3")
-          text(10, bmiExtremelyObese+5, "Extremely Obese", cex=2, col="red3")
+          text(min(10,numweeks/2), bmiExtremelyObese+5, "Extremely Obese", cex=1, col="red3")
       })
      
      output$myTable <- renderTable({ newData() }, include.rownames=FALSE)
